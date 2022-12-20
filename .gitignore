@@ -1,3 +1,10 @@
+build*/
+log*/
+*.kdev4
+.directory
+cmake*.sh
+install*/
+
 # Prerequisites
 *.d
 

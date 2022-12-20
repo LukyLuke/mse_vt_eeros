@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"  name="demo_robot">
+
+    <!-- Macros to make it easier to draw boxes and cylinders -->
+    <xacro:macro name="inertial_box" params="mass x y z *origin">
+        <inertial>
+            <xacro:insert_block name="origin"/>
+            <mass value="${mass}" />
+            <inertia ixx="${(1/12) * mass * (y*y+z*z)}" ixy="0.0" ixz="0.0"
+                     iyy="${(1/12) * mass * (x*x+z*z)}" iyz="0.0"
+                     izz="${(1/12) * mass * (x*x+y*y)}" />
+        </inertial>
+    </xacro:macro>
+    <xacro:macro name="inertial_cylinder" params="mass length radius *origin">
+        <inertial>
+            <xacro:insert_block name="origin"/>
+            <mass value="${mass}" />
+            <inertia ixx="${(1/12) * mass * (3*radius*radius + length*length)}" ixy="0.0" ixz="0.0"
+                     iyy="${(1/12) * mass * (3*radius*radius + length*length)}" iyz="0.0"
+                     izz="${(1/2) * mass * (radius*radius)}" />
+        </inertial>
+    </xacro:macro>
+
+    <!-- Materials -->
+    <material name="green">
+        <color rgba="0.2 1 0.2 1"/>
+    </material>
+    <material name="blue">
+        <color rgba="0.2 0.2 1 1"/>
+    </material>
+
+    <link name="world"></link>
+
+    <!-- A slider -->
+    <joint name="slider_joint" type="prismatic">
+        <origin xyz="-1.25 0 0.1" rpy="0 0 0"/>
+        <parent link="world"/>
+        <child link="slider_link"/>
+        <axis xyz="1 0 0"/>
+        <limit lower="0" upper="2" velocity="100" effort="100"/> 
+    </joint>
+
+    <link name="slider_link">
+        <visual>
+            <origin xyz="0 0 0.075" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.5 0.25 0.15" />
+            </geometry>
+            <material name="blue" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 0.075" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.5 0.25 0.15" />
+            </geometry>
+        </collision>
+        <xacro:inertial_box mass="0.5" x="0.5" y="0.25" z="0.15">
+            <origin xyz="0 0 0.075" rpy="0 0 0"/>
+        </xacro:inertial_box>
+    </link>
+
+    <!-- An arm connectrd to the slider -->
+    <joint name="arm_joint" type="revolute">
+        <origin xyz="0.25 0 0.15" rpy="0 0 0"/>
+        <parent link="slider_link"/>
+        <child link="arm_link"/>
+        <axis xyz="0 -1 0"/>
+        <limit lower="0" upper="${pi/2}" velocity="100" effort="100"/>
+        <dynamics damping="10.0" friction="10.0"/>
+    </joint>
+
+    <xacro:property name="arm_length" value="1" />
+    <xacro:property name="arm_radius" value="0.1" />
+    <link name="arm_link">
+        <visual>
+            <origin xyz="${arm_length/2} 0 0" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${arm_length}" radius="${arm_radius}" />
+            </geometry>
+            <material name="green" />
+        </visual>
+        <collision>
+            <origin xyz="${arm_length/2} 0 0" rpy="0 ${pi/2} 0"/>
+            <geometry>
+                <cylinder length="${arm_length}" radius="${arm_radius}" />
+            </geometry>
+        </collision>
+        <xacro:inertial_cylinder mass="1.0" length="${arm_length}" radius="${arm_radius}">
+            <origin xyz="${arm_length/2} 0 0" rpy="0 ${pi/2} 0"/>
+        </xacro:inertial_cylinder>
+    </link>
+
+
+    <!-- Gazebo specific mappings and definitions -->
+    <gazebo reference="slider_link">
+        <material>Gazebo/Green</material>
+    </gazebo>
+    <gazebo reference="arm_link">
+        <material>Gazebo/Blue</material>
+    </gazebo>
+
+    <gazebo>
+        <plugin name="gazebo_ros_joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+            <update_rate>20</update_rate>
+            <joint_name>slider_joint</joint_name>
+            <joint_name>arm_joint</joint_name>
+        </plugin>
+    </gazebo>
+
+</robot>
