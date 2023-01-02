@@ -12,9 +12,8 @@ DemoSimulationRobot::DemoSimulationRobot(const std::string node_name, const std:
 }
 
 void DemoSimulationRobot::run() {
-  auto executor = Executor::instance();
-  executor.setMainTask(*safetySystem);
-  executor.run();
+  Executor::instance().setMainTask(*safetySystem);
+  Executor::instance().run();
 }
 
 

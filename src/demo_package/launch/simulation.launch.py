@@ -9,12 +9,12 @@ import xacro
 
 def generate_launch_description():
     pkg_name = 'demo_package'
-    building_robot = 'description/building_robot.urdf.xacro'
+    building_robot = 'description/demo_motor_simulation.urdf.xacro'
 
     xacro_file = os.path.join(get_package_share_directory(pkg_name), building_robot)
     robot_description_raw = xacro.process_file(xacro_file).toxml()
 
-    node_robot_state_publisher = Node(
+    joint_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
@@ -22,6 +22,14 @@ def generate_launch_description():
             'robot_description': robot_description_raw,
             'use_sim_time': True}]
     )
+
+    joint_state_gui = Node(
+      name='joint_state_publisher_gui',
+      package='joint_state_publisher_gui',
+      executable='joint_state_publisher_gui',
+      output='screen',
+      namespace='',
+      arguments=[])
 
     rviz2 = Node(
         name='rviz2',
@@ -40,11 +48,12 @@ def generate_launch_description():
         executable='spawn_entity.py',
         output='screen',
         arguments=['-topic', 'robot_description',
-                   '-entity', 'my_robot'])
+                   '-entity', 'demo_motor_simulation'])
 
     return LaunchDescription([
         gazebo,
-        node_robot_state_publisher,
+        joint_state_publisher,
+        #joint_state_gui,
         spawn_entity,
         rviz2
     ])
