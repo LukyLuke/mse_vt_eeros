@@ -37,3 +37,7 @@ install*/
 *.exe
 *.out
 *.app
+
+# TeX
+template_Scrreprt.*
+*.log

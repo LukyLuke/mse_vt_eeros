@@ -1,0 +1,31 @@
+
+\section[Definition of task]{Definition of task}
+
+\textit{[German]} Eine bestehende Regelung f\"ur einen Motor soll wahlweise auf realer Hardware und in einer passenden Simulationsumgebung laufen gelassen werden k\"onnen.
+Ein spezielles Augenmerk soll auf einer nahtlosen Integration in das bestehende \GLS{eeros} Framework gelegt werden und mit passenden Werkzeugen soll alles m\"oglichst einfach und automatisiert gestartet und demonstriert werden k\"onnen.
+Eine komplexere Applikation mit einem kleinen Delta-Roboter soll als zweites Demonstrationsobjekt dienen.
+
+\textit{[English]} It should be possible to run an already existing control system for a simple motor even on real hardware or in a simulation.
+The main focus lies on the integration in \GLS{eeros} and some simple tools around it to automate everything for demonstration purposes.
+A more complex application based on a delta robot should be a second objective for demonstration.
+
+
+\section[Setup]{Project Setup}
+
+There are mainly three components or Systems involved in the whole setup:
+
+\begin{itemize}
+    \item[\textbf{\GLS{eeros}}] is the main part where controlling should happen.
+    \item[\textbf{\GLS{ros}}] (version 2) is the middleware where all messages are handled.
+    \item[\textbf{\Gls{gazebo}}] is a physics simulation where the motor/robot is visualized.
+\end{itemize}
+
+For controlling and demonstration purposes there more:
+
+\begin{itemize}
+    \item[\textbf{Rviz2}] can be used to just show the robot and all it's joints.
+    \item[\textbf{Rqt}] can be used to show values from a topic in a graph, explore the topics and more.
+    \item[\textbf{ROS-jsp}] (joint\_state\_publisher) can be used to control all joints..
+\end{itemize}
+
+The setup description, source code and a simple package is published under \href{https://github.com/LukyLuke/mse_vt_eeros}{Github: LukyLuke/mse\_vt\_eeros} in the wiki pages and the source code.

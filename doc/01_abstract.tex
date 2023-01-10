@@ -1,0 +1,24 @@
+
+\section*{Abstract} \label{sec:abstract}
+
+Just when starting to setup the whole toolchain \GLS{eeros}, \GLS{ros} and \GLS{gazebo} it showed that \GLS{eeros} only works with an old version of \GLS{ros}-1.
+Current Linux distributions do not support \GLS{ros}-1 anymore out of the box.
+This was the point where the first goal was to port \GLS{eeros} to \GLS{ros}-2 and second goal to have a working package.
+
+This process took quite long, due to the fact that I did neither know \GLS{eeros} nor \GLS{ros}.
+Also the documentation of both projects, in my point of view, lack of description on how they should be used.
+This was quite good with lot of code and tutorials for \GLS{ros}-1, but \GLS{ros}-2 seems not yet to be at that point.
+
+One of the biggest challenges was therefore to understand the way \GLS{ros}-1 was working and how this changed in \GLS{ros}-2.
+The main change there is, that in \GLS{ros}-2 the whole application spins and not only a node anymore.
+The effect was that, as soon as a subscriber was created, the whole \GLS{eeros} program was locked.
+However, there was a new Executor introduced in \GLS{ros}-2, which does similar things than the \GLS{eeros}-Executor.
+
+As a quick fix to solve the problem and not refactor \GLS{eeros} completely, a \GLS{ros}-2 Executor is used for all Subscriptions.
+All received Messages are stored in a queue and processed as soon as the \GLS{eeros}-Executor calls for them.
+If a \GLS{ros}-Topic is the main clock, the process is inverse: The \GLS{ros}-2 Executor triggers the \GLS{eeros}-Executor for processing.
+
+The main goal of the Project, to have a ``Motor'' in \GLS{eeros} which is simulated in \Gls{gazebo} was not reached.
+For this to work as expected, there should be a plugin in \Gls{gazebo} which would take ``power'' or something like that from a topic and then simulate rotation.
+Although there is a third-party plugin available, that one was also not ported yet to \GLS{ros}-2.
+Therefore only a package for demonstration purposes was created.

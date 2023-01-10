@@ -1,0 +1,14 @@
+
+In the new \GLS{ros}-2 world, packages can still be setup with simple python scripts.
+Also to setup a robot which can then be visualized in \Gls{gazebo} and/or \Gls{rviz}, the main file format did not change: URFD.
+However to simplify the whole process of designing a robot, \textit{xacro}\footnote{xacro is an abbreviation from macro but for xml.} may be used.
+
+
+\begin{enumerate}
+    \item A simple start script can be found under \href{https://github.com/LukyLuke/mse_vt_eeros/blob/main/src/demo_package/launch/simulation.launch.py}{launch/simulation.launch}.
+
+    \item The Robot/Motor used there is defined under description \\ \href{https://github.com/LukyLuke/mse_vt_eeros/blob/main/src/demo_package/description/demo_motor_simulation.urdf.xacro}{description/demo\_motor\_simulation.urdf.xacro}.
+
+    \item In the \href{https://github.com/LukyLuke/mse_vt_eeros/tree/main/src/demo_package/src}{/src} and \href{https://github.com/LukyLuke/mse_vt_eeros/tree/main/src/demo_package/include/demo_package}{/include} folder is a simple \GLS{eeros}-Project based on \GLS{ros}-2.
+\end{enumerate}
+

@@ -1,0 +1,138 @@
+
+Most important changes between ROS-1 and ROS-2 are available in the documentation under \href{http://docs.ros.org/en/humble/The-ROS2-Project/Contributing/Migration-Guide.html}{Migration Guide from ROS 1}.
+This is mainly the Build-System \textit{ament}, which is completely cmake based now, and \textit{colcon} as a set of build tools and not \textit{catkin} any more.
+Beside that, the C++ API changed completely to RCLCPP away from the main ros.h include.
+Also the messages moved into the subfolder msgs to not confuse ROS-1 systems which can run side by side.
+
+
+\section[C++ API]{Changes in the C++ API} \label{sec:cpp-api-changes}
+
+Changes in an EEROS-Project should not be that big. The only change which has to be applied is to create the node at the beginning and pass it in to all blocks, publishers and subscribers.
+The only ROS-Code that should be used are the messages, for the nodes and everything else, use the \textit{ros-eeros} project.
+
+
+\subsection[EEOR-Migration]{Migrate EEROS-Code} \label{sec:cpp-eeros-migration}
+
+\lstset{language=[ISO]C++}
+\begin{lstlisting}[label=code:cpp-eeros-migration, caption={[EEROS-Migration]The main changes are in the initialization and the passthrough of the node as a shared pointer. Check \textit{rosTest1} Example for complete code example.}]
+class ControlSystem {
+    public:
+    ControlSystem(const rclcpp::Node::SharedPtr node, double dt)
+    : c2(0.5),
+    doubleOut(node, "/test/val"),
+    slOut(node, "/test/safetyLevel"),
+    doubleIn(node, "/rosNodeTalker/val"),
+    timedomain(node, "Main time domain", dt, true) {
+        doubleOut.getIn().connect(c2.getOut());
+
+        timedomain.addBlock(c2);
+        timedomain.addBlock(doubleOut);
+        timedomain.addBlock(slOut);
+        timedomain.addBlock(doubleIn);
+        Executor::instance().add(timedomain);
+    }
+
+    Constant<double> c2;
+    RosPublisherDouble doubleOut;
+    RosPublisherSafetyLevel slOut;
+    RosSubscriberDouble doubleIn;
+    TimeDomain timedomain;
+}
+
+void signalHandler(int signum) {
+    Executor::stop();
+}
+
+int main(int argc, char **argv) {
+    // Setup and run the node
+    auto node = rosTools::initNode("eerosNode");
+
+    ControlSystem controlSystem(node, 0.1);
+    ROSTestSafetyProperties safetyProperties(controlSystem);
+    SafetySystem safetySystem(safetyProperties, 01);
+    controlSystem.slOut.setSafetySystem(safetySystem);
+
+    signal(SIGINT, signalHandler);
+    Executor::instance().setMainTask(safetySystem);
+    Executor::instance().run();
+}
+\end{lstlisting}
+
+
+
+
+\subsection[ROS-Migration]{Migrate from ROS-1 Code to ROS-2 Code} \label{sec:cpp-api-ros1-to-ros2}
+
+The most important changes which have been applied to EEROS and may be applied to a EEROS-Project.
+
+\lstset{language=[ISO]C++}
+\begin{lstlisting}[label=code:cpp-api-includes, caption={[Includes]The includes changed from ros.h (plus some others) to mainly only rclcpp/rclcpp.hpp. The messages are now in a subfolder and lowercase.}]
+// Old in ROS-1
+#include <ros/ros.h>
+#include <ros/callback_queue.h>
+#include <std_msgs/Float64.h>
+
+// New in ROS-2
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/float64.hpp>
+\end{lstlisting}
+
+
+\lstset{language=[ISO]C++}
+\begin{lstlisting}[label=code:cpp-api-messages, caption={[Messages]Messages in ROS-2 are more Object-Oriented and are located in the namespace \textit{msgs}.}]
+// Old in ROS-1
+std_msgs::Float64 msg1;
+sensor_msgs::LaserScan msg2;
+
+msg1.header.stamp = ros::Time::now();
+msg1.data = ...
+
+
+// New in ROS-2
+std_msgs::msg::Float64 msg1;
+sensor_msgs::msgs::LaserScan msg2;
+
+msg1.header.set__stamp(eeros::control::rosTools::convertToRosTime(eeros::System::getTimeNs()));
+msg1.data = ...
+\end{lstlisting}
+
+
+\lstset{language=[ISO]C++}
+\begin{lstlisting}[label=code:cpp-api-modes, caption={[Nodes, Subscriptions, Publisher]The base of subscriptions, pulishers, callback-groups, ... are Nodes. Each Object also has a ::SharedPtr type, which should be used instead of a reference or a manually handled pointer.}]
+// Old in ROS-1
+ros::init(argc, args, name);
+ros::NodeHandle node;
+
+ros::Publisher publisher = node.advertise<std_msgs::Float64>(``/topic'', 1000);
+publisher.publish(msg);
+
+ros::Subscriber subscriber = node.subscribe(``/topic'', 1000, &RosSubscriber::rosCallbackFct, this);
+
+
+// New in ROS-2
+rclcpp::init(argc, args);
+
+// rclcpp::Node::SharedPtr
+auto node = rclcpp::Node::make_shared(name);
+
+// rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr
+auto publisher = node->create_publisher<std_msgs::msg::Float64>(``/topic'', 1000);
+publisher->publish(msg);
+
+// rclcpp::Executor::SharedPtr
+auto executor = rclcpp::executors::MultiThreadedExecutor::make_shared();
+
+// rclcpp::CallbackGroup::SharedPtr
+auto callback_group = node->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+executor->add_callback_group(callback_group, node->get_node_base_interface());
+
+rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>> options;
+options.callback_group = callback_group;
+
+// rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr
+auto subscriber = node->create_subscription<TRosMsg>(``/topic'', 1000, std::bind(&RosSubscriber::rosSubscriberCallback, this, _1), options);
+\end{lstlisting}
+
+
+
+
