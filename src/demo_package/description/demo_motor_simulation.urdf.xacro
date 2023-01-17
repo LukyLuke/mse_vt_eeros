@@ -86,9 +86,15 @@
 
 
   <gazebo>
+    <!-- Publish the position of the given joints to the topic /joint_states -->
     <plugin name="gazebo_ros_joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
       <update_rate>20</update_rate>
       <joint_name>wheel_joint</joint_name>
+    </plugin>
+
+    <!-- Reads a trajectory_msgs/msg/JointTrajectory from /set_joint_trajectory and uses that for a new joint state -->
+    <plugin name="gazebo_ros_joint_pose_trajectory" filename="libgazebo_ros_joint_pose_trajectory.so">
+      <update_rate>2</update_rate>
     </plugin>
   </gazebo>
 

@@ -1,7 +1,8 @@
 #pragma once
 
 #include <eeros/control/ros/RosPublisher.hpp>
-#include <sensor_msgs/msg/joint_state.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 
 #include "JointState.hpp"
 
@@ -9,30 +10,30 @@ namespace eeros {
 namespace control {
 
 /**
- * This block allows to subscribe to a ROS message of type sensor_msgs::msg::JointState::Type
+ * This block allows to subscribe to a ROS message of type trajectory_msgs::msg::JointTrajectory::Type
  * and publishes it as a signal of type double.
  *
  * @since v2.0
  */
-class JointStatePublisher : public RosPublisher<sensor_msgs::msg::JointState::Type, double> {
-  typedef sensor_msgs::msg::JointState::Type TRosMsg;
+class JointTrajectoryPublisher : public RosPublisher<trajectory_msgs::msg::JointTrajectory::Type, double> {
+  typedef trajectory_msgs::msg::JointTrajectory::Type TRosMsg;
  public:
     /**
      * Creates an instance of a publisher block which publishes a input signal
-   * of type double as a ROS message of type std_msgs::msg::Float64.
+     * of type double as a ROS message of type std_msgs::msg::Float64.
      *
      * @param node - ROS Node as a SharedPtr
      * @param topic - Name of the topic
      * @param joint_name - Name of the joint to publishthe position
      */
-    JointStatePublisher(const rclcpp::Node::SharedPtr node, const std::string& topic, const std::string joint_name)
+    JointTrajectoryPublisher(const rclcpp::Node::SharedPtr node, const std::string& topic, const std::string joint_name)
       : RosPublisher<TRosMsg, double>(node, topic),
       jointName(joint_name) { }
 
     /**
      * Disabling use of copy constructor because the block should never be copied unintentionally.
      */
-    JointStatePublisher(const JointStatePublisher& other) = delete;
+    JointTrajectoryPublisher(const JointTrajectoryPublisher& other) = delete;
 
     /**
      * Sets the message to be published by this block.
@@ -45,12 +46,19 @@ class JointStatePublisher : public RosPublisher<sensor_msgs::msg::JointState::Ty
       std::vector<std::string> names = { jointName };
       std::vector<double> positions = { position };
       std::vector<double> velocities = { 0.0 };
+      std::vector<double> accelerations = { 0.0 };
       std::vector<double> efforts = { 0.0 };
 
-      msg.set__name(names)
-        .set__position(positions)
-        .set__velocity(velocities)
+      eeros::logger::Logger::getLogger().info() << "PUBLISHER: " << jointName << " = " << position;
+
+      trajectory_msgs::msg::JointTrajectoryPoint::Type points;
+      points.set__positions(positions)
+        .set__velocities(velocities)
+        .set__accelerations(accelerations)
         .set__effort(efforts);
+      msg.set__joint_names(names)
+        .set__points({points});
+      msg.header.set__frame_id("map");
     }
 
   private:

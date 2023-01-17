@@ -50,9 +50,11 @@ class JointStateSubscriber : public RosSubscriber<sensor_msgs::msg::JointState::
         double position = 0.0;
         double velocity = 0.0;
         double effort   = 0.0;
-        if (msg.position.size() >= i) { position = msg.position.at(i); }
-        if (msg.velocity.size() >= i) { position = msg.velocity.at(i); }
-        if (msg.effort.size() >= i)   { position = msg.effort.at(i); }
+        if (msg.position.size() > i) { position = msg.position.at(i); }
+        if (msg.velocity.size() > i) { velocity = msg.velocity.at(i); }
+        if (msg.effort.size() > i) { effort = msg.effort.at(i); }
+
+        eeros::logger::Logger::getLogger().info() << "SUBSCRIBER: " << jointName << " (" << name << ") = " << position;
 
         auto joint = states->findJoint(name);
         if (joint == nullptr) {

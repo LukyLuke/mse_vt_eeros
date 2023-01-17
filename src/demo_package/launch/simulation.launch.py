@@ -28,13 +28,18 @@ def generate_launch_description():
       package='joint_state_publisher_gui',
       executable='joint_state_publisher_gui',
       output='screen',
-      namespace='',
       arguments=[])
 
     rviz2 = Node(
         name='rviz2',
         package='rviz2',
         executable='rviz2',
+        arguments=[])
+
+    rqt = Node(
+        name='rqt_gui',
+        package='rqt_gui',
+        executable='rqt_gui',
         namespace='',
         arguments=[])
 
@@ -54,6 +59,7 @@ def generate_launch_description():
         gazebo,
         joint_state_publisher,
         #joint_state_gui,
-        spawn_entity,
-        rviz2
+        rviz2,
+        rqt,
+        spawn_entity
     ])
