@@ -18,9 +18,17 @@ namespace control {
   struct JointStateData {
     JointStateData(std::string name, double position, double velocity, double effort) :
       name(name), position(position), velocity(velocity), effort(effort) {};
+
+    // The name of this joint in the URDF-Model
     std::string name;
+
+    // In Radians for revolute/continuous, meters for prismatic
     double position = 0.0;
+
+    // Rate of change in position in "radians per second (r/s)" or "meters per second (m/s)"
     double velocity = 0.0;
+
+    // Torque in "newton meters" for revolute/continuous or "newtons" for prismatic
     double effort = 0.0;
   };
 

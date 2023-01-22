@@ -44,10 +44,18 @@ class JointTrajectoryPublisher : public RosPublisher<trajectory_msgs::msg::Joint
       auto position = getIn().getSignal().getValue();
 
       std::vector<std::string> names = { jointName };
+
+      // In Radians for revolute/continuous, meters for prismatic
       std::vector<double> positions = { position };
-      std::vector<double> velocities = { 0.0 };
-      std::vector<double> accelerations = { 0.0 };
-      std::vector<double> efforts = { 0.0 };
+
+      // Rate of change in position in "radians per second (r/s)" or "meters per second (m/s)"
+      std::vector<double> velocities = { 0.0000001 };
+
+      // Rate of change in velocity in "radians per square-second (r/s^2)" or "meters per square-second (m/s^2)"
+      std::vector<double> accelerations = { 0.0000001 };
+
+      // Torque in "newton meters" for revolute/continuous or "newtons" for prismatic
+      std::vector<double> efforts = { 100.1 };
 
       eeros::logger::Logger::getLogger().info() << "PUBLISHER: " << jointName << " = " << position;
 

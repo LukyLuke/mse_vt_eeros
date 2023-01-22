@@ -47,9 +47,16 @@ class JointStateSubscriber : public RosSubscriber<sensor_msgs::msg::JointState::
     virtual void rosCallbackFct(const TRosMsg& msg) {
       for (size_t i = 0; i < msg.name.size(); i++) {
         std::string name = msg.name.at(i);
+
+        // In Radians for revolute/continuous, meters for prismatic
         double position = 0.0;
+
+        // Rate of change in position in "radians per second (r/s)" or "meters per second (m/s)"
         double velocity = 0.0;
+
+        // Torque in "newton meters" for revolute/continuous or "newtons" for prismatic
         double effort   = 0.0;
+
         if (msg.position.size() > i) { position = msg.position.at(i); }
         if (msg.velocity.size() > i) { velocity = msg.velocity.at(i); }
         if (msg.effort.size() > i) { effort = msg.effort.at(i); }

@@ -50,7 +50,7 @@ class DemoRobot {
     RosPublisherSafetyLevel safetyPublisher;
     TimeDomain timedomain;
 
-    double step = 0.1;
+    double step = 0.5;
 };
 
 /**
@@ -80,7 +80,8 @@ public:
         //}
         //robot.publishJoint.setValue(angle_new);
 
-        double position_new = wheel->position + robot.step;
+        // Round the current position so we not run away too much with the value we want to move to
+        double position_new = round(wheel->position) + robot.step;
         robot.publishJoint.setValue(position_new);
       }
     });
