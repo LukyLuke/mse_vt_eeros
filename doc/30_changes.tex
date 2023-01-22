@@ -1,28 +1,28 @@
 
-Most important changes between ROS-1 and ROS-2 are available in the documentation under \href{http://docs.ros.org/en/humble/The-ROS2-Project/Contributing/Migration-Guide.html}{Migration Guide from ROS 1}.
+The most important changes between \GLS{ros}-1 and \GLS{ros}-2 are available in the documentation under \href{http://docs.ros.org/en/humble/The-ROS2-Project/Contributing/Migration-Guide.html}{Migration Guide from ROS 1}.
 This is mainly the Build-System \textit{ament}, which is completely cmake based now, and \textit{colcon} as a set of build tools and not \textit{catkin} any more.
 Beside that, the C++ API changed completely to RCLCPP away from the main ros.h include.
-Also the messages moved into the subfolder msgs to not confuse ROS-1 systems which can run side by side.
+Also the messages moved into the subfolder and namespace ``msg'' to not confuse \GLS{ros}-1 systems which can run side by side.
 
 
 \section[C++ API]{Changes in the C++ API} \label{sec:cpp-api-changes}
 
-Changes in an EEROS-Project should not be that big. The only change which has to be applied is to create the node at the beginning and pass it in to all blocks, publishers and subscribers.
-The only ROS-Code that should be used are the messages, for the nodes and everything else, use the \textit{ros-eeros} project.
+Changes in an \GLS{eeros}-Project should not be that big. The only change which has to be applied is to create the node at the beginning and pass it in to all blocks, publishers and subscribers.
+The only \GLS{ros}-Code that should be used are the messages, for the nodes and everything else, use the \textit{ros-eeros} project.
 
 
 \subsection[EEOR-Migration]{Migrate EEROS-Code} \label{sec:cpp-eeros-migration}
 
 \lstset{language=[ISO]C++}
-\begin{lstlisting}[label=code:cpp-eeros-migration, caption={[EEROS-Migration]The main changes are in the initialization and the passthrough of the node as a shared pointer. Check \textit{rosTest1} Example for complete code example.}]
+\begin{lstlisting}[label=code:cpp-eeros-migration, caption={[EEROS-Migration]The main changes are in the initialization and the passthrough of the node as a shared pointer. Check the \textit{rosTest1} example for how this is done.}]
 class ControlSystem {
     public:
     ControlSystem(const rclcpp::Node::SharedPtr node, double dt)
     : c2(0.5),
-    doubleOut(node, "/test/val"),
-    slOut(node, "/test/safetyLevel"),
-    doubleIn(node, "/rosNodeTalker/val"),
-    timedomain(node, "Main time domain", dt, true) {
+      doubleOut(node, "/test/val"),
+      slOut(node, "/test/safetyLevel"),
+      doubleIn(node, "/rosNodeTalker/val"),
+      timedomain(node, "Main time domain", dt, true) {
         doubleOut.getIn().connect(c2.getOut());
 
         timedomain.addBlock(c2);
@@ -60,13 +60,12 @@ int main(int argc, char **argv) {
 
 
 
-
 \subsection[ROS-Migration]{Migrate from ROS-1 Code to ROS-2 Code} \label{sec:cpp-api-ros1-to-ros2}
 
-The most important changes which have been applied to EEROS and may be applied to a EEROS-Project.
+The most important changes which have been applied to \GLS{eeros} and may be applied to a \GLS{eeros}-Project as well.
 
 \lstset{language=[ISO]C++}
-\begin{lstlisting}[label=code:cpp-api-includes, caption={[Includes]The includes changed from ros.h (plus some others) to mainly only rclcpp/rclcpp.hpp. The messages are now in a subfolder and lowercase.}]
+\begin{lstlisting}[label=code:cpp-api-includes, caption={[Includes]The includes changed from ros.h (plus some others) to mainly only rclcpp/rclcpp.hpp. The messages are now in the subfolder ``msg'' and changed from CamelCase to snake\_case.}]
 // Old in ROS-1
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
@@ -79,7 +78,7 @@ The most important changes which have been applied to EEROS and may be applied t
 
 
 \lstset{language=[ISO]C++}
-\begin{lstlisting}[label=code:cpp-api-messages, caption={[Messages]Messages in ROS-2 are more Object-Oriented and are located in the namespace \textit{msgs}.}]
+\begin{lstlisting}[label=code:cpp-api-messages, caption={[Messages]Messages in ROS-2 are more Object-Oriented and are located in the namespace \textit{msg}.}]
 // Old in ROS-1
 std_msgs::Float64 msg1;
 sensor_msgs::LaserScan msg2;

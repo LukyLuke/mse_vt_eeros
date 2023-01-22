@@ -12,3 +12,150 @@ However to simplify the whole process of designing a robot, \textit{xacro}\footn
     \item In the \href{https://github.com/LukyLuke/mse_vt_eeros/tree/main/src/demo_package/src}{/src} and \href{https://github.com/LukyLuke/mse_vt_eeros/tree/main/src/demo_package/include/demo_package}{/include} folder is a simple \GLS{eeros}-Project based on \GLS{ros}-2.
 \end{enumerate}
 
+
+\section[startup]{Startup} \label{sec:demo-startup}
+
+\begin{enumerate}
+    \item Install and setup \GLS{ros}-2 as described in the official documentation.
+    \item Install and setup \GLS{eeros} as described in the official documentation.
+    Until the merge of the Pull-Requests in \ref{app:eeros} and \ref{app:ros-eeros}, use the \textit{ros-2} branches of \textit{eeros} and \textit{ros-eeros}.
+    \item Clone the \href{https://github.com/LukyLuke/mse_vt_eeros}{GIT-Repository} into the EEROS-Root-Directory.
+    \item Change the value \textit{EEROS\_INCLUDE\_DIRS} if needed.
+    \item Create the \textit{build-x86/demo\_package} and \textit{install-x86/demo\_package} folder.
+    \item Run cmake inside the build directory with the correct\\
+    \textit{-DCMAKE\_INSTALL\_PREFIX=../../install-x86/demo\_package} parameter.
+    \item Build the demo\_package: `make`
+    \item Install the demo\_package with `colcon install --symlink-install`
+    \item Start the package: `ros2 launch demo\_package simulation.launch.py`
+    \item Start the EEROS-Node separately\footnote{Probably you have to set LD\_LIBRARY\_PATH="../lib/:\$LD\_LIBRARY\_PATH"}: `./demo\_package/bin/demo\_package/demo\_package`
+\end{enumerate}
+
+In the console of the demo\_package the received and sent out values will be logged.
+
+In \Gls{gazebo} you can press the pause button in the status bar to show that now for this simulation \Gls{gazebo} is the main clock.
+
+
+\subsection[Rviz2 Config]{Configure RViz2} \label{sec:demo-rviz2-config}
+
+Once started up, in \Gls{rviz} three configurations should be done to see the robot and it's joints:
+
+\begin{enumerate}
+    \item Add the TF Transform Hierarchy: Add -> TF -> OK
+    \item To show the Joint-Names, check the option \textit{Show Names} in the settings\footnote{The Settings are shown when you expand the section on the left.} of TF.
+    \item Add the Robot Model: Add -> RobotModel -> OK
+    \item Set the \textit{Description Topic} in the RobotModel to \textit{/robot\_description}.
+\end{enumerate}
+
+If everything is running as expected, the \textit{wheel\_joint} should rotate.
+
+
+\subsection[RQT Config]{Configure RQT} \label{sec:demo-rqt-config}
+
+In RQT you can show the values of the current joint value in contrast to the calculated value:
+
+\begin{enumerate}
+    \item Add the topic value `/joint\_states/position[0]` which is the value \Gls{gazebo} sends out.
+    \item Add the topic value `/set\_joint\_trajectory/points[0]/positions[0]` which is the value from \GLS{eeros}.
+\end{enumerate}
+
+If everything is running as expected, the graph should show the two values (actually on top of each other).
+
+
+\section[Source]{Source Code} \label{sec:demo-source-code}
+
+In this section the most important parts of the source code and used messages are explained.
+
+The Source of this demo package can be found in the \href{https://github.com/LukyLuke/mse_vt_eeros/}{Project Repository}.
+
+\subsection[URDF-Model]{The URDF-Robot-Model} \label{sec:demo-urdf-model}
+
+There are the two sections on the bottom, which are for interacting with \Gls{gazebo}.
+
+\subsubsection[Joint-State]{Joint-State Publisher Plugin} \label{sec:demo-urdf-model-joint-state}
+
+The Joint-State Publisher \footnote{See \href{https://github.com/ros-simulation/gazebo_ros_pkgs/blob/ros2/gazebo_plugins/include/gazebo_plugins/gazebo_ros_joint_state_publisher.hpp}{gazebo\_ros\_joint\_state\_publisher.hpp} for the Source-Code and further documentation.}
+For the message type see chapter \ref{sec:demo-subscriber}.
+
+\lstset{language=xml}
+\begin{lstlisting}[label=code:xml-urdf-joint-state, caption={[URDF-Section for Joint-States]Loading the \Gls{gazebo}-Plugin and publish \textit{wheel\_joint} to the \textit{/joint\_states} topic.}]
+<!-- Publish the position of the given joints to the topic /joint_states -->
+<plugin name="gazebo_ros_joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+    <update_rate>10</update_rate>
+    <joint_name>wheel_joint</joint_name>
+    <ros><namespace>/</namespace></ros>
+</plugin>
+\end{lstlisting}
+
+\begin{enumerate}
+    \item[\textbf{joint\_name:}] List of Joint-Names to publish, one tage for each joint.
+    \item[\textbf{update\_rate:}] \textit{(default: 100.0)} Number of milliseconds to publish to the Joint-States topic (Hz).
+    \item[\textbf{namespace:}] \textit{(default: /)} The Root-Topic under which the /joint-state topic will be published.
+\end{enumerate}
+
+
+\subsubsection[Joint-Pose]{Joint-Pose Subscriber Plugin} \label{sec:demo-urdf-model-joint-pose}
+
+The Joint-Trajectory-Pose Subscriber \footnote{See \href{https://github.com/ros-simulation/gazebo_ros_pkgs/blob/ros2/gazebo_plugins/include/gazebo_plugins/gazebo_ros_joint_pose_trajectory.hpp}{gazebo\_ros\_joint\_pose\_trajectory.hpp} for the Source-Code and further documentation.} which reads messages from a topic and applies the values to the given joints.
+For the message type see chapter \ref{sec:demo-publisher}.
+
+\lstset{language=xml}
+\begin{lstlisting}[label=code:xml-urdf-joint-pose, caption={[URDF-Section for Joint-Trajectory Poses]Loading the \Gls{gazebo}-Plugin and subscribe to the \textit{set\_joint\_trajectory} topic to receive new positions for the given joints in the message.}]
+<!-- Reads a trajectory_msgs/msg/JointTrajectory from /set_joint_trajectory and uses that for a new joint state -->
+<plugin name="gazebo_ros_joint_pose_trajectory" filename="libgazebo_ros_joint_pose_trajectory.so">
+    <update_rate>10</update_rate>
+    <ros><namespace>/</namespace></ros>
+</plugin>
+\end{lstlisting}
+
+\begin{enumerate}
+    \item[\textbf{update\_rate:}] \textit{(default: 100.0)} Number of milliseconds to read messages from the topic (Hz).
+    \item[\textbf{namespace:}] \textit{(default: /)} The Root-Topic under which the /set\_joint\_trajectory topic will be read.
+\end{enumerate}
+
+
+
+\subsection[Subscriber]{Joint-State Subscriber} \label{sec:demo-subscriber}
+
+For demonstration purposes, a simple \texttt{JointStateSubscriber} is implemented in an \GLS{eeros} Project.
+It simply receives a \texttt{sensor\_msgs/msg/JointState} ROS-Message and transforms it into the internal \texttt{JointState} type.
+
+\subsubsection[JointState-Message]{The JointState Message Format} \label{sec:deom-subscriber-message}
+
+A \texttt{JointState}-Message\footnote{See \href{https://docs.ros2.org/latest/api/sensor_msgs/msg/JointState.html}{JointState.msg} for more documentation.} consists of four fields, which are all lists where the indexes corresponds:
+
+\begin{enumerate}
+    \item[\textbf{name}] \textit{(string)} List of all Joints which are published
+    \item[\textbf{position}] \textit{(i64)} The position of the joint in rad or meter
+    \item[\textbf{velocity}] \textit{(i64)} The current velocity in rad/s or m/s
+    \item[\textbf{effort}] \textit{(i64)} The applied force in Nm or N
+\end{enumerate}
+
+
+\subsection[Publisher]{Trajectory-Pose Subscriber} \label{sec:demo-publisher}
+
+To publish a changed value, a \texttt{JointTrajectoryPublisher} is implemented for demonstration purposes.
+It simply converts the double from a signal into a\\
+\texttt{trajecotry\_msgs/msg/JointTrajectory} ROS-Message and sends it out to the topic\footnote{The acceleration, velocity and effort values are not used in \Gls{gazebo} or I understand something totally wrong.}.
+Thereby the \textit{acceleration}, \textit{velocity} and \textit{effort} is set to a static value.
+This because the internally used \texttt{JointState} from the \texttt{JointStateSubscriber} could not be used easily as a Constant or any other EEROS-Type.
+
+\subsubsection[JointTrajectoryPose-Message]{The JointTrajectory Message Format} \label{sec:deom-publisher-message}
+
+A \texttt{JointTrajectory}-Message\footnote{See \href{https://docs.ros2.org/latest/api/trajectory_msgs/msg/JointTrajectory.html}{JointTrajectory.msg} for more documentation.} consists of two fields, which are all lists where the indexes corresponds:
+
+\begin{enumerate}
+    \item[\textbf{joint\_names}] \textit{(string[])} List of all Joints which are published
+    \item[\textbf{points}] \textit{(JointTrajectoryPoint[])} List of Points which should be reached
+\end{enumerate}
+
+The \texttt{JointTrajectoryPoint} ROS-Message consists of four lists which have to correspond to the \textit{joint\_names} in the \texttt{JointTrajectory} ROS-Message:
+
+\begin{enumerate}
+    \item[\textbf{positions}] \textit{(i64)} The position of the joint in rad or meter
+    \item[\textbf{velocities}] \textit{(i64)} The current velocity in rad/s or m/s
+    \item[\textbf{accelerations}] \textit{(i64)} The applied rate of change in velocity in rad/sec\^2 or m/sec\^2
+    \item[\textbf{effort}] \textit{(i64)} The applied force in Nm or N
+\end{enumerate}
+
+
+
