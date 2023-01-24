@@ -1,0 +1,189 @@
+\documentclass[
+    11pt,
+    latin1,
+    a4paper,
+    onecolumn,
+    openany,
+    pdftex,
+    oneside
+]{scrbook}
+\usepackage[latin1]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdfpages}
+\usepackage{lastpage}
+\usepackage{caption}
+\usepackage[style=iso]{datetime2}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{subfigure}
+\usepackage{float}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{setspace} % \onehalfspacing, ...
+
+%% Missing footnotes fix
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+
+% Globale Definitionen
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhf{} % Clear all header and footer styles
+\fancyfoot[C]{- \thepage \ -}
+\fancyfoot[R]{\includegraphics[width=6em]{images/CreativeCommons_logo_trademark}\\\footnotesize{CC-BY-SA-4.0}}
+
+% Codeblocks
+\usepackage{listings}
+\usepackage{color}
+\definecolor{listings}{RGB}{237,241,246}
+\lstloadlanguages{Clean,XML,bash,[ANSI]C,[ISO]C++}
+\lstset{frame=tb,numbers=left,captionpos=b,numberstyle=\tiny,basicstyle=\small,breaklines=true}
+\renewcommand*{\thelstnumber}{{\the\value{lstnumber}}{:}}
+\renewcommand*{\lstlistlistingname}{Index: Codeblocks}
+\renewcommand*{\lstlistingname}{Codeblock}
+
+%% Index
+\usepackage{makeidx}
+\makeindex
+
+%% Glossary
+\usepackage{glossaries}
+\makeglossaries
+
+%% Caption modifications
+\usepackage{caption}
+\captionsetup{margin=20pt,labelfont=bf,font=footnotesize,justification=justified,singlelinecheck=false}
+
+%% PDF Meta-Informationen
+\hypersetup{%
+	%bookmarks=true, % Lesezeichen erzeugen
+	bookmarksopen=false, % Lesezeichen ausgeklappt
+	bookmarksnumbered=true, % Anzeige der Kapitelzahlen am Anfang der Namen der Lesezeichen
+	breaklinks=true, % ermöglicht einen Umbruch von URLs
+	colorlinks=true, % Einfärbung von Links
+	linkcolor=black, % Linkfarbe
+	anchorcolor=black, % Ankerfarbe
+	citecolor=blue, % Literaturlinks
+	filecolor=black, % Links zu lokalen Dateien
+	menucolor=black, % Acrobat Menü Einträge
+	urlcolor=blue, % URL-Farbe
+	%pdfpagemode=UseThumbs, % Anzeige der Piktogramme
+	pdfstartpage={1}, % Startseite
+	pdftitle = {\@title},
+	pdfsubject = {\@subject},
+	pdfauthor = {\@author},
+	pdfcreator = {LaTeX to PDF-Creator},
+	pdfproducer = {LaTeX with hyperref}
+}
+
+%% Globale Definitionen
+\bibliographystyle{alphadin}
+\newcommand{\at}{\symbol{64}}
+\newcommand{\tld}{\symbol{126}}
+
+%% Date
+\DTMsavedate{publishdate}{2022-01-24}
+
+%% Dokument Meta-Informationen
+\author{Lukas Zurschmiede\\MSc BioMedEng 2021 OST\\06-655-138}
+\date{Lommis, \DTMusedate{publishdate}}
+\publishers{Advisor: Urs Graf, INF Institut f�r Ingenieurinformatik, Dozent f�r Informatik}
+\titlehead{\includegraphics[width=3cm]{images/ost-logo-de}}
+\title{Demonstrator for a Realtime Regulator}
+\subject{VT1, EEROS with Gazebo}
+
+
+%% Anfang des Dokuments
+\begin{document}
+
+	%% Titlepage
+	\maketitle
+
+	%% 1.5 Zeilenabstand f\"ur Abstract
+	\onehalfspacing
+
+	%% Abstract
+	\newpage
+	\setcounter{page}{1}
+	\pagenumbering{Roman}
+	\input{01_abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %% Inhaltsverzeichnis auf neuer Seite
+    \pagebreak
+    \singlespacing
+    \tableofcontents
+    \pagebreak
+
+    % Absatz-Formatierungen
+    \onehalfspacing
+    \setcounter{page}{1}
+    \pagenumbering{arabic}
+
+    %% Dokumentation von hier an
+    \chapter{Introduction} \label{sec:introduction}
+    \input{10_introduction}
+
+    \chapter{Concept} \label{sec:concept}
+    \input{20_concept}
+
+    \chapter{Changes in ROS-2} \label{sec:changes}
+    \input{30_changes}
+
+    \chapter{Demonstration Package} \label{sec:demostration}
+    \input{40_demonstration}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %% Anhang etc.
+    \newpage
+    \setcounter{page}{1}
+    \pagenumbering{Alph}
+
+    \addcontentsline{toc}{chapter}{Index}
+
+    \input{99_glossary}
+    %\addcontentsline{toc}{chapter}{Glossary}
+    \printglossary
+
+    % Index
+    %\newpage
+    %\addcontentsline{toc}{chapter}{Index}
+    %\printindex
+
+    %% Abbildungs und Tabellenverzeichnis
+    \newpage
+    %\addcontentsline {toc}{chapter}{Figures}
+    %\listoffigures
+    %\addcontentsline {toc}{chapter}{Tables}
+    %\listoftables
+    %\addcontentsline {toc}{chapter}{Code}
+    %\listofalgorithms
+    \lstlistoflistings
+
+    %% Literaturverzeichniss
+    %\addcontentsline {toc}{chapter}{Literature}
+    %\bibliography{literatur_concat}
+
+    %% Anhang
+    \newpage
+    \addcontentsline{toc}{chapter}{Appendix}
+    \chapter*{Appendix}
+    \input{99_anhang}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    \noindent
+    \newline\newline\newline\newline
+    \begin{tabular}{p{4.5in}}
+        \hline \\
+        Lommis, \DTMusedate{publishdate}
+    \end{tabular}
+
+\end{document}
